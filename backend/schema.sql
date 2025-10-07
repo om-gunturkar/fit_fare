@@ -1,0 +1,25 @@
+CREATE DATABASE IF NOT EXISTS notifications_db;
+USE notifications_db;
+
+CREATE TABLE notifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  type VARCHAR(50),
+  message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user VARCHAR(100),
+  rating INT,
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE bookings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  trainer VARCHAR(100),
+  time VARCHAR(100),
+  type VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
