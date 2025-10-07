@@ -1,20 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import io from 'socket.io-client';
-import API from '../api';
+import React, { useEffect, useState, useCallback } from 'react';
+import { API, socket } from '../api';
+import { Bell } from 'lucide-react';
+import './NotificationPanel.css'; // custom CSS
 
-const socket = io('http://localhost:5000');
-
-export default function NotificationPanel() {
+const NotificationPanel = () => {
   const [notifications, setNotifications] = useState([]);
   const [toast, setToast] = useState(null);
 
-  const fetchNotifications = async () => {
-    const res = await API.get('/notifications');
-    setNotifications(res.data);
-  };
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await API.get('/notifications');
+      setNotifications(res.data || []);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+    }
+  }, []);
 
   useEffect(() => {
     fetchNotifications();
+
     socket.on('newNotification', (data) => {
       setToast(`${data.type}: ${data.message}`);
       fetchNotifications();
@@ -22,19 +26,34 @@ export default function NotificationPanel() {
     });
 
     return () => socket.off('newNotification');
-  }, []);
+  }, [fetchNotifications]);
 
   return (
-    <div className="card">
-      <h2>Notifications</h2>
+    <div className="notification-card">
+      <div className="notification-header">
+        <Bell className="bell-icon" />
+        <h2>Notifications</h2>
+      </div>
+
       {toast && <div className="toast">{toast}</div>}
-      <ul>
-        {notifications.map((n) => (
-          <li key={n.id}>
-            <b>{n.type}</b> - {n.message}
-          </li>
-        ))}
-      </ul>
+
+      <div className="notification-list">
+        {notifications.length === 0 ? (
+          <p className="no-notifications">No notifications yet.</p>
+        ) : (
+          notifications.map((n) => (
+            <div key={n.id} className="notification-item">
+              <div className="notification-type">{n.type}</div>
+              <div className="notification-message">{n.message}</div>
+              <div className="notification-time">
+                {new Date(n.created_at).toLocaleString()}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default NotificationPanel;
