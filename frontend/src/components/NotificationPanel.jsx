@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { API, socket } from '../api';
 import { Bell } from 'lucide-react';
-import './NotificationPanel.css'; // custom CSS
+import './Styles1.css';
 
 const NotificationPanel = () => {
   const [notifications, setNotifications] = useState([]);
@@ -21,11 +21,32 @@ const NotificationPanel = () => {
 
     socket.on('newNotification', (data) => {
       setToast(`${data.type}: ${data.message}`);
-      fetchNotifications();
+      fetchNotifications(); 
       setTimeout(() => setToast(null), 4000);
     });
 
-    return () => socket.off('newNotification');
+   
+    socket.on('idle-reminder', (data) => {
+    
+      setToast(`🔔 ${data.type}: ${data.message}`);
+    
+      setTimeout(() => setToast(null), 8000);
+    });
+
+   
+    socket.on('sessionReminder', (data) => {
+     
+      setToast(`🚨 ${data.type}: ${data.message}`);
+     
+      setTimeout(() => setToast(null), 10000);
+    });
+
+    
+    return () => {
+      socket.off('newNotification');
+      socket.off('idle-reminder');
+      socket.off('sessionReminder');
+    };
   }, [fetchNotifications]);
 
   return (
@@ -35,6 +56,7 @@ const NotificationPanel = () => {
         <h2>Notifications</h2>
       </div>
 
+  
       {toast && <div className="toast">{toast}</div>}
 
       <div className="notification-list">
